@@ -24,8 +24,7 @@ public JSONObject createSpace(Request request, Response response) throws SQLExce
       // security vulnerability!
       database.updateUnique(
           "INSERT INTO spaces(space_id, name, owner) " +
-              "VALUES(" + spaceId + ", '" + spaceName +
-              "', '" + owner + "');");
+              "VALUES(?, ?, ?);", spaceId, spaceName, owner);
               
       response.status(201);
       response.header("Location", "/spaces/" + spaceId);
