@@ -1,15 +1,19 @@
 package com.manning.apisecurityinaction;
 
+import static spark.Spark.*;
+
 import java.nio.file.*;
 
-import com.manning.apisecurityinaction.controller.*;
 import org.dalesbred.Database;
 import org.dalesbred.result.EmptyResultException;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.json.*;
+
+import com.google.common.util.concurrent.*;
+import com.manning.apisecurityinaction.controller.*;
+
 import spark.*;
 
-import static spark.Spark.*;
 
 public class Main {
 
@@ -23,6 +27,14 @@ public class Main {
 
         database = Database.forDataSource(datasource);
         var spaceController = new SpaceController(database);
+
+        var rateLimiter = RateLimiter.create(2.0d);
+
+        before((request, response) -> {
+          if (!rateLimiter.tryAcquire()) {
+            halt(429, "Too many requests");
+          }
+        });
 
         before(((request, response) -> {
             if (request.requestMethod().equals("POST") &&
