@@ -1,4 +1,5 @@
 com/manning/apisecurityinaction/controller/ModeratorController.class
+com/manning/apisecurityinaction/controller/UserController.class
 com/manning/apisecurityinaction/controller/SpaceController$Message.class
 com/manning/apisecurityinaction/controller/SpaceController.class
 com/manning/apisecurityinaction/Main.class
