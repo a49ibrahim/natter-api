@@ -39,4 +39,32 @@ public class UserController {
     response.header("Location", "/users/" + username);
     return new JSONObject().put("username", username);
   }
+
+  public void authenticate(Request request, Response response) {
+    var authHeader = request.headers("Authorization");
+    if (authHeader == null || !authHeader.startsWith("Basic ")) {
+      return;
+    }
+
+    var offset = "Basic ".length();
+    var credentials = new String(Base64.getDecoder().decode(
+      authHeader.substring(offset)), StandardCharsets.UTF_8);
+    var components = credentials.split(":", 2);
+    if (components.length != 2) {
+      throw new IllegalArgumentException("inavlid auth header");
+    }
+
+    var username = components[0];
+    var password = components[1];
+
+    if(!username.matches(USERNAME_PATTERN)) {
+        throw new IllegalArgumentException("invalid username");
+    }
+
+    var hash = database.findOptional(String.class,
+    "SELECT pw_hash FROM users WHERE user_id=?", username);
+
+    if(hash.isPresent() && SCryptUtil.check(password, hash.get())) {
+      request.attribute("subject", username);
+    }
 }
