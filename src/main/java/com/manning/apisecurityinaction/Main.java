@@ -1,11 +1,15 @@
 package com.manning.apisecurityinaction;
 
+import java.nio.file.*;
+
 import com.manning.apisecurityinaction.controller.*;
 import org.dalesbred.Database;
+import org.dalesbred.result.EmptyResultException;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.json.*;
+import spark.*;
 
-import java.nio.file.*;
+
 
 import static spark.Spark.*;
 
@@ -34,7 +38,16 @@ public class Main {
         notFound(new JSONObject()
             .put("error", "not found").toString());
 
+        Exception(IllegalArgumentException.class, Main::badRequest);
+        Exception(JSONException.class, Main::badRequest);
+        Exception(EmptyResultException.class, (e, request, response) -> response.status(404));
+
       
+    }
+
+    private static void badRequest(Exception ex, Request request, Response response) {
+      response.status(400);
+      response.body(new JSONObject().put("error", ex.getMessage()).toString());
     }
 
     private static void createTables(Database database) throws Exception {
