@@ -24,8 +24,9 @@ public class SpaceController {
       throw new IllegalArgumentException("space name too long");
     }
     var owner = json.getString("owner");
-    if (!owner.matches("[a-zA-Z][a-zA-Z0-9]{1,29}")) {
-      throw new IllegalArgumentException("invalid username");
+    var subject = request.attribute("subject");
+    if (!owner.equals(subject)) {
+      throw new IllegalArgumentException("owner must match authenticated user");
     }
 
     return database.withTransaction(tx -> {
@@ -50,8 +51,8 @@ public class SpaceController {
     var spaceId = Long.parseLong(request.params(":spaceId"));
     var json = new JSONObject(request.body());
     var user = json.getString("author");
-    if (!user.matches("[a-zA-Z][a-zA-Z0-9]{0,29}")) {
-      throw new IllegalArgumentException("invalid username");
+    if (!user.equals(request.attribute("subject"))) {
+      throw new IllegalArgumentException("author must match authenticated user");
     }
     var message = json.getString("message");
     if (message.length() > 1024) {
